@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	api_cep_channel := make(chan models.HttpOutput)
-	via_cep_channel := make(chan models.HttpOutput)
+	apiCepChannel := make(chan models.HttpOutput)
+	viaCepChannel := make(chan models.HttpOutput)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	var out consulta.ConsoleOutputAdapter
@@ -23,16 +23,16 @@ func main() {
 	}
 	var runner consulta.ConsultaCep
 
-	go runner.Run(&ctx, &apiCep, &out, &api_cep_channel)
-	go runner.Run(&ctx, &viaCep, &out, &via_cep_channel)
+	go runner.Run(&ctx, &apiCep, &out, &apiCepChannel)
+	go runner.Run(&ctx, &viaCep, &out, &viaCepChannel)
 
 	select {
-	case apiCepResult := <-api_cep_channel:
+	case apiCepResult := <-apiCepChannel:
 		if apiCepResult.Error != nil {
 			//API Cep executou primeiro, cancelar context para não executar via cep
 			cancel()
 		}
-	case viaCepResult := <-via_cep_channel:
+	case viaCepResult := <-viaCepChannel:
 		if viaCepResult.Error != nil {
 			//Via Cep executou primeiro, cancelar context para não executar api cep
 			cancel()
